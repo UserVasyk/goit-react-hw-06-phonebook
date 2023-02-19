@@ -1,64 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { addContact } from 'redux/contactsSlice';
 import { nanoid } from 'nanoid';
 import { ContactList } from './ContactList/ContactList';
 import { ContactForm } from './ContactFrom/ContactFrom';
 import { Filter } from './Filter/Filter';
 import { Title, Box, TitleContacts } from './App.styled';
+import { useSelector } from 'react-redux';
+
 export const App = () => {
-  const [contacts, setContacts] = useState(() => {
-    return (
-      JSON.parse(localStorage.getItem('contacts')) ?? [
-        { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-        { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-        { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-        { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-      ]
-    );
-  });
-  const [filter, setFilter] = useState('');
+  const dispatch = useDispatch();
+  const fftest = useSelector(state => state.filter);
+  const contacts = useSelector(state => state.contacts);
 
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  const addContact = ({ name, number }) => {
+  const addContactm = ({ name, number }) => {
     const contact = {
       id: nanoid(),
       name,
       number,
     };
+
     const isExist = contacts.find(contact => contact.name === name);
     if (isExist !== undefined) {
       return alert(`${name} is already in contacts`);
     } else {
-      setContacts([...contacts, contact]);
+      dispatch(addContact(contact));
+
+      console.log('contactsGG: ', contacts);
     }
-  };
-  const changeFilter = evt => {
-    setFilter(evt.currentTarget.value);
   };
 
   const getVisibleContacts = () => {
-    const normalizedFilter = filter.toLowerCase();
+    const normalizedFilter = fftest.toLowerCase();
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalizedFilter)
     );
   };
 
-  const deleteContact = id => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
-  };
-
   return (
     <Box>
+      <h1>{fftest}</h1>
       <Title>Phonebook</Title>
-      <ContactForm onSubmit={addContact} />
+      <ContactForm onSubmit={addContactm} />
       <TitleContacts>Contacts</TitleContacts>
-      <Filter changeFilter={changeFilter} filter={filter} />
-      <ContactList
-        deleteContact={deleteContact}
-        contacts={getVisibleContacts()}
-      />
+      <Filter />
+      <ContactList contacts={getVisibleContacts()} />
     </Box>
   );
 };
